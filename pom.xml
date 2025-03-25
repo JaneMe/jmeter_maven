@@ -1,0 +1,334 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.jane</groupId>
+  <artifactId>jmeter_maven</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>jmeter_maven</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <!-- 源代码编码格式 -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- jtl格式测试报告存储路径 -->
+    <jmeter.result.jtl.dir>${project.basedir}/src/test/jmeter/report/jtl</jmeter.result.jtl.dir>
+    <!-- html格式测试报告存储路径 -->
+    <jmeter.result.html.dir>${project.basedir}/src/test/jmeter/report/html</jmeter.result.html.dir>
+    <!-- JMeter脚本存储路径 -->
+    <jmeter.script.code.dir>${project.basedir}/src/test/jmeter/script</jmeter.script.code.dir>
+    <!-- resource存储路径 -->
+    <jmeter.resources.dir>${project.basedir}/src/test/resources</jmeter.resources.dir>
+    <!-- 日志存储路径  -->
+    <jmeter.logs.dir>${project.basedir}/src/test/jmeter/logs</jmeter.logs.dir>
+    <!-- 设置时间戳格式（例如 yyyy-MM-dd-HH-mm-ss） -->
+    <maven.build.timestamp>${maven.build.timestamp.format}</maven.build.timestamp>
+    <maven.build.timestamp.format>【yyyy-MM-dd HH:mm:ss】</maven.build.timestamp.format>
+  </properties>
+  
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.jmeter</groupId>
+      <artifactId>ApacheJMeter_java</artifactId>
+      <version>5.6.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.jmeter</groupId>
+      <artifactId>ApacheJMeter_core</artifactId>
+      <version>5.6.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.jmeter</groupId>
+      <artifactId>ApacheJMeter_components</artifactId>
+      <version>5.6.3</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>xml-maven-plugin</artifactId>
+      <version>1.0-beta-3</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>net.sf.saxon</groupId>
+      <artifactId>saxon</artifactId>
+      <version>8.7</version>
+    </dependency>
+    
+    <dependency>
+      <!-- 用于拷贝测试结果前清理目录 -->
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-clean-plugin</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+    
+    <!-- Log4j 依赖 -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.17.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.14.1</version>
+    </dependency>
+    
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.lazerycode.jmeter</groupId>
+        <artifactId>jmeter-maven-plugin</artifactId>
+        <version>3.7.0</version>
+        <executions>
+          <execution>
+            <id>configuration</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>configure</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jmeter-tests</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>jmeter</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jmeter-check-results</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>results</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <jmeterVersion>5.6.3</jmeterVersion>
+          
+          <!-- 将jar添加到/ lib / ext目录 -->
+          <jmeterExtensions>
+            <artifact>kg.apc:jmeter-plugins:pom:1.3.1</artifact>
+          </jmeterExtensions>
+          
+          <!-- 将jar添加到 /lib/ext 目录 -->
+          <!-- <jmeterExtensions> -->
+          <!--   <artifact>kg.apc:jmeter-plugins-casutg:2.4</artifact> -->
+          <!-- </jmeterExtensions> -->
+          <!-- <downloadExtensionDependencies>false</downloadExtensionDependencies> -->
+          
+          <!-- 设置jmeter生成结果文件格式-->
+          <resultsFileFormat>xml</resultsFileFormat>
+          
+          <!-- 忽略测试结果中的失败-->
+          <ignoreResultFailures>true</ignoreResultFailures>
+          
+          <!-- 指定jtl测试报告生成目录 -->
+          <resultsDirectory>${jmeter.result.jtl.dir}</resultsDirectory>
+          
+          <!-- 指定HTML测试报告生成目录 -->
+          <reportDirectory>${jmeter.result.html.dir}</reportDirectory>
+          
+          <!-- 运行指定目录下的所有jmeter脚本 -->
+          <testFilesDirectory>${jmeter.script.code.dir}</testFilesDirectory>
+          <testFilesIncluded>
+            <filesIncluded>**/*.jmx</filesIncluded>
+          </testFilesIncluded>
+          
+          <!-- 配置JMeter属性文件目录 -->
+          <propertiesFilesDirectory>src/test/jmeter/properties</propertiesFilesDirectory>
+          
+          <!-- 忽略 .jtl 或 .csv 结果文件中故障 -->
+          <ignoreResultFailures>true</ignoreResultFailures>
+          <!-- 关闭 JMeter 输出打印到控制台 -->
+          <suppressJMeterOutput>true</suppressJMeterOutput>
+          <!-- 设置测试报告文件名称是否有时间戳，true为显示时间戳，false为不显示时间戳 -->
+          <testResultsTimestamp>true</testResultsTimestamp>
+          <!-- 将时间戳添加到文件名的开头/末尾, false为开头，true为末尾，这会影响文件的排序 -->
+          <appendResultsTimestamp>false</appendResultsTimestamp>
+          <!-- 设置文件名时间戳格式 -->
+          <resultsFileNameDateFormat>【yyyy-MM-dd HH:mm:ss】</resultsFileNameDateFormat>
+          <!-- 设置日志目录 -->
+          <logsDirectory>${jmeter.logs.dir}</logsDirectory>
+          <!-- 设置日志级别 -->
+          <overrideRootLogLevel>debug</overrideRootLogLevel>
+          <!-- 跳过测试 -->
+          <!-- <skipTests>${skipTests}</skipTests> -->
+          
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <!-- 清空目录：复制测试报告到src/test/jmeter/report下的html和jtl目录前先清空该目录 -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>clean-jmeter-reports-dir</id>
+            <!-- 必须在 pre-integration-test 集成测试前期阶段清理报告目录 -->
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <!-- 在MacOS/Linux系统上使用rm命令 -->
+              <executable>rm</executable>
+              <arguments>
+                <argument>-rf</argument>
+                <!-- 这个目录与拷贝html测试报告的目标目录一致 -->
+                <argument>${project.basedir}/src/test/jmeter/report/html</argument>
+              </arguments>
+              <!-- 在Windows系统上使用以下配置 -->
+              <!-- <executable>cmd</executable>
+              <arguments>
+                <argument>/c</argument>
+                <argument>if exist "${project.basedir}/src/test/jmeter/reports" rmdir /s /q "${project.basedir}/src/test/jmeter/reports" && mkdir "${project.basedir}/src/test/jmeter/reports"</argument>
+              </arguments> -->
+            </configuration>
+          </execution>
+          <execution>
+            <id>clean-jmeter-results-dir</id>
+            <!-- 必须在 pre-integration-test 集成测试前期阶段清理报告目录 -->
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <!-- 在MacOS/Linux系统上使用rm命令 -->
+              <executable>rm</executable>
+              <arguments>
+                <argument>-rf</argument>
+                <!-- 这个目录与拷贝jtl测试报告的目标目录一致 -->
+                <argument>${project.basedir}/src/test/jmeter/report/jtl</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-jmeter-icons</id>
+            <!-- 集成测试后期阶段进行拷贝 -->
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <!-- 将icon图标拷贝到该目录下 -->
+              <outputDirectory>${project.basedir}/src/test/jmeter/report/html</outputDirectory>
+              <!-- 拷贝哪个目录下的icon -->
+              <resources>
+                <resource>
+                  <directory>${jmeter.resources.dir}</directory>
+                             <includes>
+                    <include>**/*.png</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-jmeter-results</id>
+            <!-- 集成测试后期阶段进行拷贝 -->
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <!-- 将jtl测试报告拷贝到该目录下 -->
+              <outputDirectory>${project.basedir}/src/test/jmeter/report/jtl</outputDirectory>
+              <!-- 拷贝哪个目录下的文件 -->
+              <resources>
+                <resource>
+                  <directory>${jmeter.result.jtl.dir}</directory>
+                  <!-- 所有jtl和xml格式的文件都进行拷贝 -->
+                  <includes>
+                    <include>**/*.jtl</include>
+                    <include>**/*.xml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-jmeter-reports</id>
+            <!-- 集成测试后期阶段进行拷贝 -->
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <!-- 将html测试报告拷贝到该目录下 -->
+              <outputDirectory>${project.basedir}/src/test/jmeter/report/html</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${jmeter.result.html.dir}</directory>
+                  <!-- 不进行过滤 -->
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <!--根据xsl模版把jtl文件转换成html-->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>xml-maven-plugin</artifactId>
+        <version>1.0-beta-3</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>transform</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <transformationSets>
+            <transformationSet>
+              <dir>${jmeter.result.jtl.dir}</dir>
+              <stylesheet>src/test/resources/jmeter-results-detail-report_21.xsl</stylesheet>
+              <outputDir>${jmeter.result.html.dir}</outputDir>
+              <fileMappers>
+                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                  <targetExtension>html</targetExtension>
+                </fileMapper>
+              </fileMappers>
+            </transformationSet>
+          </transformationSets>
+          
+        </configuration>
+        <!-- using XSLT 2.0 -->
+        <dependencies>
+          <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <version>8.7</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+    
+  </build>
+</project>
