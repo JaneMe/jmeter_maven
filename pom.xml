@@ -15,10 +15,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- jtl格式测试报告存储路径 -->
     <jmeter.result.jtl.dir>${project.basedir}/src/test/jmeter/report/jtl</jmeter.result.jtl.dir>
-    <!-- html详细测试报告存储路径 -->
-    <jmeter.result.html_detail.dir>${project.basedir}/src/test/jmeter/report/html_detail</jmeter.result.html_detail.dir>
     <!-- html汇总测试报告存储路径 -->
     <jmeter.result.html_summary.dir>${project.basedir}/src/test/jmeter/report/html_summary</jmeter.result.html_summary.dir>
+    <!-- html详细测试报告存储路径 -->
+    <jmeter.result.html_detail.dir>${project.basedir}/src/test/jmeter/report/html_detail</jmeter.result.html_detail.dir>
     <!-- JMeter脚本存储路径 -->
     <jmeter.script.code.dir>${project.basedir}/src/test/jmeter/script</jmeter.script.code.dir>
     <!-- resource存储路径 -->
@@ -28,6 +28,8 @@
     <!-- 设置时间戳格式（例如 yyyy-MM-dd-HH-mm-ss） -->
     <maven.build.timestamp>${maven.build.timestamp.format}</maven.build.timestamp>
     <maven.build.timestamp.format>【yyyy-MM-dd HH:mm:ss】</maven.build.timestamp.format>
+    <!-- 压缩报告存储路径 -->
+    <jmeter.report.rar.dir>${project.basedir}/src/test/jmeter/rar</jmeter.report.rar.dir>
   </properties>
   
   <dependencies>
@@ -134,25 +136,19 @@
           
           <!-- 设置jmeter生成结果文件格式-->
           <resultsFileFormat>xml</resultsFileFormat>
-          
           <!-- 忽略测试结果中的失败-->
           <ignoreResultFailures>true</ignoreResultFailures>
-          
           <!-- 指定jtl测试报告生成目录 -->
           <resultsDirectory>${jmeter.result.jtl.dir}</resultsDirectory>
-          
           <!-- 指定HTML测试报告生成目录 -->
           <reportDirectory>${jmeter.result.html.dir}</reportDirectory>
-          
           <!-- 运行指定目录下的所有jmeter脚本 -->
           <testFilesDirectory>${jmeter.script.code.dir}</testFilesDirectory>
           <testFilesIncluded>
             <filesIncluded>**/*.jmx</filesIncluded>
           </testFilesIncluded>
-          
           <!-- 配置JMeter属性文件目录 -->
           <propertiesFilesDirectory>src/test/jmeter/properties</propertiesFilesDirectory>
-          
           <!-- 忽略 .jtl 或 .csv 结果文件中故障 -->
           <ignoreResultFailures>true</ignoreResultFailures>
           <!-- 关闭 JMeter 输出打印到控制台 -->
@@ -169,7 +165,6 @@
           <overrideRootLogLevel>debug</overrideRootLogLevel>
           <!-- 跳过测试 -->
           <!-- <skipTests>${skipTests}</skipTests> -->
-          
         </configuration>
       </plugin>
       
@@ -191,8 +186,12 @@
               <executable>rm</executable>
               <arguments>
                 <argument>-rf</argument>
-                <!-- 这个目录与拷贝html测试报告的目标目录一致 -->
-                <argument>${project.basedir}/src/test/jmeter/report/html</argument>
+                <!-- 清理html汇总测试报告  -->
+                <argument>${project.basedir}/src/test/jmeter/report/html_detail</argument>
+                <!-- 清理html详细测试报告 -->
+                <argument>${project.basedir}/src/test/jmeter/report/html_summary</argument>
+                <!-- 清理jtl测试报告 -->
+                <argument>${project.basedir}/src/test/jmeter/report/jtl</argument>
               </arguments>
               <!-- 在Windows系统上使用以下配置 -->
               <!-- <executable>cmd</executable>
@@ -202,23 +201,7 @@
               </arguments> -->
             </configuration>
           </execution>
-          <execution>
-            <id>clean-jmeter-results-dir</id>
-            <!-- 必须在 pre-integration-test 集成测试前期阶段清理报告目录 -->
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <!-- 在MacOS/Linux系统上使用rm命令 -->
-              <executable>rm</executable>
-              <arguments>
-                <argument>-rf</argument>
-                <!-- 这个目录与拷贝jtl测试报告的目标目录一致 -->
-                <argument>${project.basedir}/src/test/jmeter/report/jtl</argument>
-              </arguments>
-            </configuration>
-          </execution>
+         
         </executions>
       </plugin>
       
@@ -236,12 +219,13 @@
             </goals>
             <configuration>
               <!-- 将icon图标拷贝到该目录下 -->
-              <outputDirectory>${project.basedir}/src/test/jmeter/report/html_detail</outputDirectory>
+              <outputDirectory>${project.basedir}/src/test/jmeter/report/html_summary</outputDirectory>
               <!-- 拷贝哪个目录下的icon -->
               <resources>
                 <resource>
                   <directory>${jmeter.resources.dir}</directory>
-                             <includes>
+                  <!-- 只拷贝png格式的文件 -->
+                  <includes>
                     <include>**/*.png</include>
                   </includes>
                 </resource>
@@ -308,22 +292,22 @@
         </executions>
         <configuration>
           <transformationSets>
-            <!-- 使用jmeter-results-detail-report_21.xsl模版，将jtl转换成html详细测试报告 -->
+            <!-- 使用jmeter-results-detail-report_21.xsl模版，将jtl转换成html汇总测试报告 -->
             <transformationSet>
               <dir>${jmeter.result.jtl.dir}</dir>
               <stylesheet>src/test/resources/jmeter-results-detail-report_21.xsl</stylesheet>
-              <outputDir>${jmeter.result.html_detail.dir}</outputDir>
+              <outputDir>${jmeter.result.html_summary.dir}</outputDir>
               <fileMappers>
                 <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
                   <targetExtension>html</targetExtension>
                 </fileMapper>
               </fileMappers>
             </transformationSet>
-            <!-- 使用shanhe.me的xsl模版，将jtl转换成html汇总测试报告 -->
+            <!-- 使用shanhe.me的xsl模版，将jtl转换成html详细测试报告 -->
             <transformationSet>
               <dir>${jmeter.result.jtl.dir}</dir>
               <stylesheet>src/test/resources/jmeter.results.shanhe.me.xsl</stylesheet>
-              <outputDir>${jmeter.result.html_summary.dir}</outputDir>
+              <outputDir>${jmeter.result.html_detail.dir}</outputDir>
               <fileMappers>
                 <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
                   <targetExtension>html</targetExtension>
@@ -341,7 +325,38 @@
           </dependency>
         </dependencies>
       </plugin>
+      
+      <!-- 添加创建报告压缩包的插件配置 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>create-report-zip</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- 创建报告压缩包存放目录 -->
+                <mkdir dir="${jmeter.report.rar.dir}" />
+                
+                <!-- 生成带时间戳的压缩文件名 -->
+                <tstamp>
+                  <format property="current.time" pattern="yyyy-MM-dd_HH-mm-ss" />
+                </tstamp>
+                
+                <!-- 使用zip任务创建压缩包 -->
+                <zip destfile="${jmeter.report.rar.dir}/jmeter-report-${current.time}.rar"
+                     basedir="${project.basedir}/src/test/jmeter"
+                     includes="report/**" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-    
   </build>
 </project>
