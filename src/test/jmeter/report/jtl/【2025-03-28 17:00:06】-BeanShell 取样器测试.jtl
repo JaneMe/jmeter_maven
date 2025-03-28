@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testResults version="1.2">
+<sample t="5" it="0" lt="0" ct="0" ts="1743152407529" s="true" lb="BeanShell 取样器" rc="200" rm="OK" tn="线程组 1-1" dt="text" by="0" sby="0" ng="1" na="1"/>
+<httpSample t="1061" it="0" lt="714" ct="258" ts="1743152407580" s="true" lb="HTTP请求" rc="200" rm="OK" tn="线程组 1-1" dt="text" by="316730" sby="146" ng="1" na="1">
+  <java.net.URL>https://www.163.com/search?keyword=旺财</java.net.URL>
+</httpSample>
+<sample t="0" it="0" lt="0" ct="0" ts="1743152408654" s="true" lb="调试取样器" rc="200" rm="OK" tn="线程组 1-1" dt="text" by="292" sby="0" ng="1" na="1"/>
+
+</testResults>

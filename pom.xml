@@ -15,8 +15,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- jtl格式测试报告存储路径 -->
     <jmeter.result.jtl.dir>${project.basedir}/src/test/jmeter/report/jtl</jmeter.result.jtl.dir>
-    <!-- html格式测试报告存储路径 -->
-    <jmeter.result.html.dir>${project.basedir}/src/test/jmeter/report/html</jmeter.result.html.dir>
+    <!-- html详细测试报告存储路径 -->
+    <jmeter.result.html_detail.dir>${project.basedir}/src/test/jmeter/report/html_detail</jmeter.result.html_detail.dir>
+    <!-- html汇总测试报告存储路径 -->
+    <jmeter.result.html_summary.dir>${project.basedir}/src/test/jmeter/report/html_summary</jmeter.result.html_summary.dir>
     <!-- JMeter脚本存储路径 -->
     <jmeter.script.code.dir>${project.basedir}/src/test/jmeter/script</jmeter.script.code.dir>
     <!-- resource存储路径 -->
@@ -234,7 +236,7 @@
             </goals>
             <configuration>
               <!-- 将icon图标拷贝到该目录下 -->
-              <outputDirectory>${project.basedir}/src/test/jmeter/report/html</outputDirectory>
+              <outputDirectory>${project.basedir}/src/test/jmeter/report/html_detail</outputDirectory>
               <!-- 拷贝哪个目录下的icon -->
               <resources>
                 <resource>
@@ -306,10 +308,22 @@
         </executions>
         <configuration>
           <transformationSets>
+            <!-- 使用jmeter-results-detail-report_21.xsl模版，将jtl转换成html详细测试报告 -->
             <transformationSet>
               <dir>${jmeter.result.jtl.dir}</dir>
               <stylesheet>src/test/resources/jmeter-results-detail-report_21.xsl</stylesheet>
-              <outputDir>${jmeter.result.html.dir}</outputDir>
+              <outputDir>${jmeter.result.html_detail.dir}</outputDir>
+              <fileMappers>
+                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                  <targetExtension>html</targetExtension>
+                </fileMapper>
+              </fileMappers>
+            </transformationSet>
+            <!-- 使用shanhe.me的xsl模版，将jtl转换成html汇总测试报告 -->
+            <transformationSet>
+              <dir>${jmeter.result.jtl.dir}</dir>
+              <stylesheet>src/test/resources/jmeter.results.shanhe.me.xsl</stylesheet>
+              <outputDir>${jmeter.result.html_summary.dir}</outputDir>
               <fileMappers>
                 <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
                   <targetExtension>html</targetExtension>
@@ -317,7 +331,6 @@
               </fileMappers>
             </transformationSet>
           </transformationSets>
-          
         </configuration>
         <!-- using XSLT 2.0 -->
         <dependencies>
